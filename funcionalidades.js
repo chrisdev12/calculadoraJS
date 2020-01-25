@@ -7,123 +7,89 @@ var execute = document.querySelector("#execute");
 
 
 
-var infoMostrar = [];
 
-const showAll = (operacionIngresando) => {
-    
-    infoMostrar.push(operacionIngresando);
-    total.textContent = infoMostrar.join(' ');
-    
-}
-
-const borrarNumeros = () => {
-    numeros.textContent = '0';
-}
-
-
-
-//Agregar números y msotrarlos por pantalla
+//Agregar y mostrar números/operadores en pantalla
 var valoresIngresando = [] //Ir guardando los valores puestos;
 
-const numerosPantalla = async (event) => {
+const numerosPantalla = (event) => {
     
-    var valores = await guardarValor(event);
+    let valores = event.target.innerText;
     valoresIngresando.push(valores);
       
     numeros.textContent = valoresIngresando.join('');
+    showAll(valores);
 }
 
-const guardarValor = (event) => {
-      
-    var num = ""; //Lista de los números o valores a operar
-    num = event.target.innerText;
-    return num
-}
 
 //------------------------------------------------------------------
 
 
-var valoresAOperar = []; //Guardar los valores en un array diferente para poder borrar en pantalla
+// Mostrar las operaciones realizandose
 
-const operadorPantalla = async (event) => {
+var valoresMostrandose = []; //Solo el valor que se está escribiendo | Agnóstico a otras operaciones o valores
+
+const showAll = (datos) => {
     
-    // Guardar valor en array, mostrarlo en segunda pantalla, y borrar para colocar nuevo valor.
+    valoresMostrandose.push(datos);     
+    total.textContent = valoresMostrandose.join('');
     
-    valoresAOperar.push(valoresIngresando.join(''));
-    console.log(valoresAOperar)
-    showAll(valoresIngresando.join(''))
-    valoresIngresando = [] //limpia la lista para nuevos valores
-    borrarNumeros() 
-    
-    //-----------------------------------
-    
-    
-    //Mostrar operador (+,-,*,/) en pantalla
-    let operador = await guardarOperador(event);
-    showAll(operador) 
-    operacion.textContent = operador;
 }
 
 
-var accionOperacion = []
-const guardarOperador = (event) => {  //Operadores establecidos
-    var operandos = ""  
-    operandos = event.target.innerText;
-    accionOperacion.push(operandos);
-    
-    return operandos
+const borrarNumeros = () => {
+    numeros.textContent = '0';
+    valoresIngresando = [] 
 }
 
+// ----------------------------------------------------------------------
 
 
-//Evento agregar números mediante botones
-var valores = document.querySelectorAll(".number");
-
-valores.forEach(element => {
-    element.addEventListener('click', numerosPantalla)
-});
-
-//Evento agregar operadores mediante botoness
-
-var operadores = document.querySelectorAll(".operador");
-
-operadores.forEach(element => {
-    element.addEventListener('click', operadorPantalla)
-});
+// Comportamiento de cuando se presiona una operación.number
+// "Cuando se presiona el operando (-,+,X o %) es cuando se admite que el primer valor es el que se desea operar con otros".
 
 
+var operacionFinal = [] //Aqui quedará un array que representa la operación final a hacerse
+
+const establecerValor = (valoresRegistrados,operador) => {  //Mostrar operador (+,-,*,/) en pantalla
+    
+    // var lastIndex = valoresRegistrados.length - 1;
+    operacionFinal.push(valoresRegistrados.join(''));
+    operacionFinal.push(operador);   
+}
+
+const operadorPantalla = (event) => { //guardar un valor de más de dos digitos cuando se presiona un signo de operación
+     
+    let operandos = event.target.innerText;
+    operacion.textContent = operandos;
+    establecerValor(valoresIngresando, operandos); 
+    showAll(operandos);
+    borrarNumeros(); 
+}
+//-------------------------------------------------------------------------
+     
 //Ejecutar operación y mostrar resultado por pantalla
 
 
 const resultado = () => {
-    
-    valoresAOperar.push(valoresIngresando.join(''));
-    showAll(valoresIngresando.join(''))
+    operacionFinal.push(numeros.innerText);
     
     
-    let funcion = accionOperacion; //Simbolo de operacion
-    var i = 0;
-    var result = 0;
-    
+    var resultadoFinal = '';
         
-        if (funcion[0] === '/') {
-        result += parseInt(valoresAOperar[0]) / parseInt(valoresAOperar[1]); 
-    } else if (funcion[0] === '*') {
-        result += parseInt(valoresAOperar[0]) * parseInt(valoresAOperar[1]);
-    } else if (funcion[0] === '+') {
-        result += parseInt(valoresAOperar[0]) + parseInt(valoresAOperar[1]);
-    } else if (funcion[0] === '-') {
-        result += parseInt(valoresAOperar[0]) - parseInt(valoresAOperar[1]);
-    } else {
-        result = "No fue seleccionada nignuna operacion";
-    }
+    operacionFinal.forEach(element => { 
+        resultadoFinal += element
+    });
     
-     numeros.textContent = `El resultado es: ${result}`;  
-}  
+    resultadoFinal = eval(resultadoFinal); 
+    
+    numeros.textContent = `El resultado es: ${resultadoFinal}`;
+}    
+
+
 
 execute.addEventListener('click', resultado);
 
-
+//-------------------------------------------------------------------------------
 
 
 //Reinicar todo
@@ -139,7 +105,30 @@ const limpiarConsola = () => {
     valoresAOperar = [];
     accionOperacion = [];
     valoresIngresando = [];
-    infoMostrar = [];
+    valoresMostrandose = [];
+    operacionFinal = [];
 }
 
 reset.addEventListener('click', limpiarConsola);
+
+
+
+//Eventos agregar números  y operadores mediante botones
+
+var valores = document.querySelectorAll(".number");
+
+valores.forEach(element => {
+    element.addEventListener('click', numerosPantalla)
+});
+
+//Evento agregar operadores mediante botones
+
+var operadores = document.querySelectorAll(".operador");
+
+
+operadores.forEach(element => {
+    element.addEventListener('click', operadorPantalla)
+});
+
+
+//-----------------------------------------------------------
